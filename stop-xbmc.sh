@@ -1,0 +1,1 @@
+sudo initctl stop xbmc

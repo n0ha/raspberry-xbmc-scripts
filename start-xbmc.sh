@@ -1,0 +1,1 @@
+sudo initctl start xbmc
