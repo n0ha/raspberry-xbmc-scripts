@@ -7,24 +7,19 @@
 # - /dev/sda: the USB stick with root partition
 #
 # The images are copied verbatim, including empty space.
-# To save space, bare git repository is used to store the images.
+# To save space, bup git repository is used to store the images.
 #
-# Commiting to git repo works like this
-# working repo --> cloned from bare repo
+# 1. images are copied to working dir, and commited
+# 2. bup is used to backup the files
+# 3. images are deleted from working dir
 #
-# 1. images are copied to working repo, and commited
-# 2. push origin master from working to bare
-# 3. images are deleted from working
-#
-# Recommended to run every night.
-# Sample cron set to 3AM:
-# 0 3 * * * sudo /home/pi/s/backup-pi.sh
+# Recommended to run once a week.
+# Sample cron set to 2AM every Sunday:
+# 0 2 * * 0 backup-pi.sh
 
 # directories
 ROOT_DIR="/media/My Book/Backup/pi"
-
-BARE_GIT_REPO="$ROOT_DIR/bare"
-WORKING_GIT_REPO="$ROOT_DIR/working"
+WORKING_DIR="$ROOT_DIR/working"
 
 SD_SOURCE="/dev/mmcblk0"
 USB_SOURCE="/dev/sda"
@@ -32,7 +27,6 @@ SD_FILENAME="sd-card.image"
 USB_FILENAME="usb-stick.image"
 
 LOG_FILE="$ROOT_DIR/backup.log"
-touch "$LOG_FILE"
 
 DATE=`date +%Y-%m-%d`
 FULL_DATE=`date`
@@ -49,9 +43,7 @@ echo "current time: $FULL_DATE"
 echo;
 
 # create target dir
-# TODO check if exists and exit
-# TODO check if repo is clean and exit
-TARGET_DIR="$WORKING_GIT_REPO/$DATE"
+TARGET_DIR="$WORKING_DIR/$DATE"
 echo "target directory is: $TARGET_DIR"
 
 # check if target dir exists
@@ -65,38 +57,25 @@ mkdir -p "$TARGET_DIR"
 
 # first, copy the images
 echo "copying sd-card image: $SD_SOURCE --> $TARGET_DIR/$SD_FILENAME"
-#sudo dd if="$SD_SOURCE" of="$TARGET_DIR/$SD_FILENAME"
+sudo dd if="$SD_SOURCE" of="$TARGET_DIR/$SD_FILENAME"
 echo "copying usb-stick image: $USB_SOURCE --> $TARGET_DIR/$USB_FILENAME"
-#sudo dd if="$USB_SOURCE" of="$TARGET_DIR/$USB_FILENAME"
-
-touch "$TARGET_DIR/$SD_FILENAME"
-touch "$TARGET_DIR/$USB_FILENAME"
+sudo dd if="$USB_SOURCE" of="$TARGET_DIR/$USB_FILENAME"
 
 # add images to repo and commit
 echo "commiting new images.."
-cd "$WORKING_GIT_REPO"
-git add "$DATE"
-git commit -m "backup of SD-card and USB-stick images for $DATE"
+bup index "$TARGET_DIR"
+bup save -n pi-backup "$TARGET_DIR"
+bup fsck -g
 
 # exit if error
 if [ $# -eq 1 ]; then
-	echo "git commit returned non-zero code. exiting.."
-	exit
-fi
-
-# push commit to bare
-echo "pushing to bare repo.."
-git push origin master
-
-# exit if error
-if [ $# -eq 1 ]; then
-	echo "git push returned non-zero code. exiting.."
+	echo "bup save returned non-zero code. exiting.."
 	exit
 fi
 
 # deleting images from working
-echo "deleting pushed images.."
-rm -rf "$DATE"
+echo "deleting pushed images..$TARGET_DIR"
+rm -rf "$TARGET_DIR"
 
 # success!
 echo "backup done successfuly! see u tomorrow."

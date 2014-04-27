@@ -1,5 +1,10 @@
 #!/bin/bash
 
+LOG_FILE="/home/pi/web/services-status.html"
+exec 6>&1 # Link file descriptor #6 with stdout. Saves stdout 
+exec 7>&2 # Link file descriptor #7 with stderr. Saves stderr
+exec > "$LOG_FILE" 2>&1
+
 COUCHPOTATO=`ps uax|grep "/usr/bin/python CouchPotato.py"|grep -v grep|wc -l`
 TRANSMISSION=`ps uax|grep "/usr/bin/transmission-daemon"|grep -v grep|wc -l`
 LIGHTTPD=`ps uax|grep "/usr/sbin/lighttpd"|grep -v grep|wc -l`
@@ -24,3 +29,6 @@ if [ $SICKBEARD -gt 0 ]; then    started "SickBeard     "; else stopped "SickBea
 if [ $NZBGET -eq 1 ]; then       started "NZBGet        "; else stopped "NZBGet        "; fi
 echo "</pre>"
 	
+# restore streams
+exec 1>&6 6>&- # Restore stdout and close file descriptor #6
+exec 2>&7 7>&-      # Restore stderr and close file descriptor #7
