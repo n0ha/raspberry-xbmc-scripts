@@ -18,6 +18,7 @@
 # 0 2 * * 0 backup-pi.sh
 
 # directories
+export BUP_DIR="/media/My Book/Backup/bup"
 ROOT_DIR="/media/My Book/Backup/pi"
 WORKING_DIR="$ROOT_DIR/working"
 
@@ -34,7 +35,7 @@ FULL_DATE=`date`
 # redirect stdout and stderr, restore after script
 exec 6>&1 # Link file descriptor #6 with stdout. Saves stdout
 exec 7>&2 # Link file descriptor #7 with stderr. Saves stderr
-exec > "$LOG_FILE" 2>&1
+exec >> "$LOG_FILE" 2>&1
 
 # starting backup
 echo "============================="
