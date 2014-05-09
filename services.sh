@@ -6,6 +6,7 @@ LIGHTTPD=`ps uax|grep "/usr/sbin/lighttpd"|grep -v grep|wc -l`
 XBMC=`ps uax|grep "/home/pi/.xbmc-current/xbmc-bin/lib/xbmc/xbmc.bin"|grep -v grep|wc -l`
 SICKBEARD=`ps uax|grep "python /home/pi/.sickbeard/SickBeard.py -q"|grep -v grep|wc -l`
 NZBGET=`ps uax|grep "/home/pi/.nzbget/bin/nzbget -D"|grep -v grep|wc -l`
+TVHEADEND=`ps uax|grep "/usr/bin/tvheadend"|grep -v grep|grep -v root|wc -l`
 
 function started() {
 	echo -e "\e[1m$1\e[0m\t\t\e[32mSTARTED\e[0m"
@@ -21,5 +22,4 @@ if [ $LIGHTTPD -eq 1 ]; then started "LigHTTPd"; else stopped "LigHTTPd"; fi
 if [ $XBMC -gt 0 ]; then started "XBMC\t"; else stopped "XBMC\t"; fi
 if [ $SICKBEARD -gt 0 ]; then started "SickBeard"; else stopped "SickBeard"; fi
 if [ $NZBGET -eq 1 ]; then started "NZBGet\t"; else stopped "NZBGet\t"; fi
-
-	
+if [ $TVHEADEND -eq 1 ]; then started "TVHeadend"; else stopped "TVHeadend"; fi
