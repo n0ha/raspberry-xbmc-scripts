@@ -21,7 +21,10 @@ function stopped() {
 	echo -e "<b>$1</b><span style=\"color:red;\">STOPPED</span>"
 }
 
-echo "<pre>Last updated: $(date)<br/>"
+echo "<pre>"
+echo "$(uptime)"
+echo;
+
 if [ $COUCHPOTATO -eq 1 ]; then  started "Couchpotato   "; else stopped "Couchpotato   "; fi
 if [ $TRANSMISSION -eq 1 ]; then started "Transmission  "; else stopped "Transmission  "; fi
 if [ $LIGHTTPD -eq 1 ]; then     started "LigHTTPd      "; else stopped "LigHTTPd      "; fi
